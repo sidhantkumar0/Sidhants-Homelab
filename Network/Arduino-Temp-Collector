@@ -1,0 +1,104 @@
+/*
+ 
+  Advanced Arduino Temp + Humidity (DHT11 / DHT22)
+  -------------------------------------------------
+ 
+*/
+
+#include <DHT.h>  // Handles the DHT timing + gives us friendly read functions
+
+// ------------------- Hardware setup -------------------
+// Data pin (signal wire from the sensor)
+const byte DHT_PIN = 2;
+
+// Sensor type:
+// - DHT11 (blue, cheaper, less accurate)
+// - DHT22 (white / AM2302, better accuracy)
+const byte DHT_TYPE = DHT11;
+
+// LED pin for alerts (13 is the built-in LED on a lot of Arduino boards)
+const byte LED_PIN = 13;
+
+// Create the sensor object
+DHT dht(DHT_PIN, DHT_TYPE);
+
+// ------------------- Timing setup -------------------
+// DHT sensors should NOT be read too fast.
+// 2000ms = 2 seconds is safe and avoids random failures/NaN.
+const unsigned long READ_INTERVAL_MS = 2000;
+unsigned long lastReadMs = 0;
+
+// Store the latest readings here (cleaner than re-declaring every time)
+float tempC, humidity, heatIndexC;
+
+void setup() {
+  Serial.begin(9600);
+  delay(500); // gives Serial Monitor time to connect (especially on some boards)
+
+  Serial.println("Advanced DHT Sensor Booting...");
+
+  // Start the sensor
+  dht.begin();
+
+  // Setup our alert LED
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+
+  Serial.println("Ready.\n");
+}
+
+void loop() {
+  unsigned long now = millis();
+
+  // Only run the sensor read when our interval has passed
+  if (now - lastReadMs >= READ_INTERVAL_MS) {
+    lastReadMs = now;
+
+    // ------------------- Read the sensor -------------------
+    // If the sensor fails, these can come back as NaN
+    humidity = dht.readHumidity();
+    tempC    = dht.readTemperature(); // Celsius
+
+    // If the read fails, print a helpful message and try again next cycle
+    if (isnan(humidity) || isnan(tempC)) {
+      Serial.println("⚠️  Sensor read failed. Check wiring, power, and sensor type.");
+      // Most common causes:
+      // - Wrong DHT_TYPE (DHT11 vs DHT22)
+      // - Wires too long / loose connection
+      // - Bare sensor missing pull-up resistor
+      return;
+    }
+
+    // ------------------- Heat Index (Feels Like) -------------------
+    // Heat Index uses temp + humidity to estimate how hot it FEELS.
+    // The last parameter 'false' means:
+    //   false = Celsius input
+    //   true  = Fahrenheit input
+    heatIndexC = dht.computeHeatIndex(tempC, humidity, false);
+
+    // ------------------- Print clean output -------------------
+    Serial.print("Humidity: ");
+    Serial.print(humidity, 1);
+    Serial.print("%  |  Temp: ");
+    Serial.print(tempC, 1);
+    Serial.print("C  |  Heat Index: ");
+    Serial.print(heatIndexC, 1);
+    Serial.println("C");
+
+    // ------------------- Simple automation / alert logic -------------------
+    // These are example limits — change them to whatever fits your project.
+    // Tip: If your LED flickers on/off near the limit, add "hysteresis" later.
+    const float TEMP_ALERT_C = 30.0;  // alert if above 30C
+    const float HUM_ALERT_P  = 70.0;  // alert if above 70% RH
+
+    if (tempC > TEMP_ALERT_C || humidity > HUM_ALERT_P) {
+      Serial.println("⚠️  ALERT: Environment above normal range!");
+      digitalWrite(LED_PIN, HIGH);
+    } else {
+      digitalWrite(LED_PIN, LOW);
+    }
+  }
+
+  // Nothing else here — keep loop clean and predictable.
+  // Easy to expand later: relay control, OLED display, logging, WiFi, etc.
+}
