@@ -1,0 +1,259 @@
+Core-Switch#copy running-config startup-config
+Destination filename [startup-config]?
+Building configuration...
+[OK]
+Core-Switch#write mem
+Core-Switch#write memory
+Building configuration...
+[OK]
+Core-Switch#show run
+Core-Switch#show running-config
+Building configuration...
+
+Current configuration : 9742 bytes
+!
+! Last configuration change at 18:11:54 UTC Mon Aug 24 2026 by admin
+!
+version 16.12
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service call-home
+platform punt-keepalive disable-kernel-core
+!
+hostname Core-Switch
+!
+!
+vrf definition Mgmt-vrf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable secret 9 $9$H.y3o9At/7WFWk$EypdDCX910A1cepvfrYJzmdqoHKEEXaYktYrCm5snBY
+!
+no aaa new-model
+switch 1 provision ws-c3850-24t
+!
+!
+!
+!
+call-home
+ ! If contact email address in call-home is configured as sch-smart-licensing@cisco.com
+ ! the email address configured in Cisco Smart License Portal will be used as contact email address to send SCH notifications.
+ contact-email-addr sch-smart-licensing@cisco.com
+ profile "CiscoTAC-1"
+  active
+  destination transport-method http
+  no destination transport-method email
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name homelab.local
+!
+!
+!
+login on-success log
+!
+!
+!
+!
+!
+no device-tracking logging theft
+!
+crypto pki trustpoint TP-self-signed-180249563
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-180249563
+ revocation-check none
+ rsakeypair TP-self-signed-180249563
+!
+crypto pki trustpoint SLA-TrustPoint
+ enrollment pkcs12
+ revocation-check crl
+!
+
+!
+!
+license boot level ipbasek9
+!
+!
+diagnostic bootup level minimal
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+memory free low-watermark processor 79489
+!
+username admin privilege 15 secret 9 $9$5InnncYllMMFok$2JzSiKehyB0EMFszt4RklvUp9OWajK06Bxrrgn6zUoE
+!
+redundancy
+ mode sso
+!
+!
+!
+!
+!
+transceiver type all
+ monitoring
+lldp run
+!
+!
+
+!
+policy-map system-cpp-policy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ vrf forwarding Mgmt-vrf
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/0/1
+ description Uplink_to_Omada_Router
+ switchport trunk allowed vlan 1,10
+ switchport mode trunk
+!
+interface GigabitEthernet1/0/2
+ description Omada_Controller
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet1/0/3
+ description PI-Server1
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet1/0/4
+ description Admin_Laptop
+ switchport access vlan 10
+ switchport mode access
+!
+interface GigabitEthernet1/0/5
+ description PI-Server2
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet1/0/6
+ description PI-Server3
+ switchport access vlan 10
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet1/0/7
+!
+interface GigabitEthernet1/0/8
+!
+interface GigabitEthernet1/0/9
+!
+interface GigabitEthernet1/0/10
+!
+interface GigabitEthernet1/0/11
+!
+interface GigabitEthernet1/0/12
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet1/0/13
+!
+interface GigabitEthernet1/0/14
+!
+interface GigabitEthernet1/0/15
+!
+interface GigabitEthernet1/0/16
+!
+interface GigabitEthernet1/0/17
+!
+interface GigabitEthernet1/0/18
+!
+interface GigabitEthernet1/0/19
+!
+interface GigabitEthernet1/0/20
+!
+interface GigabitEthernet1/0/21
+!
+interface GigabitEthernet1/0/22
+!
+interface GigabitEthernet1/0/23
+!
+interface GigabitEthernet1/0/24
+!
+interface GigabitEthernet1/1/1
+!
+interface GigabitEthernet1/1/2
+!
+interface GigabitEthernet1/1/3
+!
+interface GigabitEthernet1/1/4
+!
+interface TenGigabitEthernet1/1/1
+!
+interface TenGigabitEthernet1/1/2
+!
+interface TenGigabitEthernet1/1/3
+!
+interface TenGigabitEthernet1/1/4
+!
+interface Vlan1
+ ip address 192.168.0.103 255.255.255.0
+!
+interface Vlan10
+ description Mangement_SVI
+ ip address 192.168.10.30 255.255.255.0
+!
+ip default-gateway 192.168.10.1
+ip forward-protocol nd
+no ip http server
+ip http authentication local
+ip http secure-server
+ip ssh time-out 60
+ip ssh authentication-retries 5
+ip ssh version 2
+!
+!
+!
+!
+!
+control-plane
+ service-policy input system-cpp-policy
+!
+banner motd ^CGet out^!!!^C
+!
+line con 0
+ login local
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ no login
+ transport input none
+line vty 5 15
+ login local
+ transport input ssh
+!
+!
+!
+!
+!
+!
+!
+end
+
+Core-Switch#
