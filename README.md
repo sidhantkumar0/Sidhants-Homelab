@@ -34,7 +34,7 @@ Goals for this project:
 
 | Category | Hardware |
 |---|---|
-| ISP Gateway|
+| ISP Gateway| Rogers Router |
 | Router | TP-Link ER605 |
 | SDN Controller | TP-Link OC200 |
 | Core Switch | Cisco Catalyst WS-C3850-24T-E (data-only, no PoE) |
