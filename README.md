@@ -46,34 +46,33 @@ Goals for this project:
 ## 🌐 Network Topology
 
 ```text
-                         Internet
+                                             Internet
                             │
-                     ┌─────────────┐
-                     │ Rogers XB8  │
-                     │ ISP Gateway │
-                     └──────┬──────┘
+                       Rogers XB8
+                     (Cable modem/gateway)
                             │
-                     ┌──────▼──────┐
-                     │  TP-Link    │
-                     │   ER605     │
-                     │   Router    │
-                     └──────┬──────┘
+                         ER605
+                         (Router)
                             │
-                        Trunk (VLAN 10 and Vlan 1)
+                    ┌───────┴───────┐
+                    │  802.1Q Trunk │
+                    │    VLAN 10    │
+                    └───────┬───────┘
+                            ▼
+                       Cisco 3850
+                      (Core switch)
                             │
-                   ┌────────▼────────┐
-                   │  Cisco Catalyst │
-                   │      3850       │
-                   │   Core Switch   │
-                   └───────┬─────────┘
-                           │
-             ┌─────────────┼─────────────┐
-             │             │             │
-          ┌──▼───┐      ┌──▼───┐      ┌──▼───┐
-          │ OC200│      │ Pi's  │      │ Admin │
-          │VLAN10│      │VLAN10 │      │Laptop │
-          └──────┘      └───────┘      └───────┘
-```
+                        VLAN 10
+                            │
+        ┌──────────┬────────┼────────┬──────────┐
+        │           │       │       │          │
+        ▼           ▼       ▼       ▼          ▼
+     OC200        Pi #1    Pi #2    Pi #3       Laptop
+                    │
+                   USB
+                    │
+                    ▼
+                 Arduino
 
 The network currently runs as a single flat VLAN 10 across the trunk to the Cisco 3850 (VLAN 1 has been retired). Full topology history and diagrams live in [`/network/`](./network/).
 
