@@ -1,1 +1,44 @@
+# Why I Am Using the Cisco 3850
 
+The Cisco Catalyst 3850 is a Layer 3 switch with 24 ports. Although the switch does not have PoE+, I chose to use it in my homelab because it gives me a more realistic lab environment and allows me to become familiar with Cisco equipment that I may encounter in a real-world environment.
+
+For now, I am primarily using the 3850 as a **Layer 2 switch**. Once I get a dedicated router for the lab, I plan to start using the 3850 as a **Layer 3 switch** and configure it for routing between VLANs. This will allow me to expand the lab and get more hands-on experience with Layer 3 switching and routing.
+
+## Current VLAN Setup
+
+I created **VLAN 10** as the management VLAN. This VLAN is currently being used for the management of the Cisco switch, Raspberry Pi servers, and Omada OC200.
+
+The current port assignments are:
+
+| Port        | VLAN             | Device             | Configuration  |
+| ----------- | ---------------- | ------------------ | -------------- |
+| **Gi1/0/1** | VLAN 10 & VLAN 1 | Omada ER605 Router | Trunk / Uplink |
+| **Gi1/0/2** | VLAN 10          | Omada OC200        | Access Port    |
+| **Gi1/0/3** | VLAN 10          | Pi-Server1         | Access Port    |
+| **Gi1/0/4** | VLAN 10          | Admin Laptop       | Access Port    |
+| **Gi1/0/5** | VLAN 10          | Pi-Server2         | Access Port    |
+| **Gi1/0/6** | VLAN 10          | Pi-Server3         | Access Port    |
+
+Port 1 is the uplink to the **Omada ER605 router** and is configured as a trunk, carrying both VLAN 10 and VLAN 1.
+
+The remaining ports are currently configured as access ports on VLAN 10.
+
+## Initial Configuration Issues
+
+One of the first issues I ran into with the Cisco 3850 was that it was a **used switch**, so it still had configuration from the previous owner. The previous owner had not completely wiped the switch before I received it.
+
+I initially thought I had completely erased the configuration, but I made a mistake during the process. I erased the **running configuration**, but I did not erase the VLAN database. Because of this, some of the previous VLAN information was still present.
+
+After realizing what I had done wrong, I went through the process again and properly wiped the VLAN configuration as well. This gave me a clean starting point for my own lab configuration.
+
+### Lesson Learned: Save the Configuration
+
+Another issue I ran into was forgetting to save my configuration.
+
+I had spent time configuring the switch and had everything working, but I forgot that the changes were only in the running configuration. I accidentally removed the power cable from the switch, which caused the switch to reboot and my newly created configuration was lost.
+
+This was a good reminder that changes made to the running configuration are not automatically saved to the startup configuration.
+
+Since then, I have been more careful about saving my configurations after making changes.
+
+This was one of the first lessons I learned while setting up the Cisco portion of my homelab: **always verify the configuration and save it before powering down the device.**
