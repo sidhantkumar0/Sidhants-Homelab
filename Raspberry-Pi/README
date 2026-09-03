@@ -1,1 +1,25 @@
+Raspberry Pi Information:
+
+Raspberry Pi 1 -> Model 4B 4GB RAM with 32gb sd card [used for collecting Arduino Temp and hosting own Graphana website]
+Raspberry Pi 2 -> Model 4B 4GB RAM with 64gb sd card [nothing]
+Raspberry Pi 3 -> Model 4B 8GB RAM with 128gb sd card [nothing]
+
+OS: Raspberry Pi OS (64-bit), Desktop version (same for all)
+All Pi's have static IPs set and have SSH access.
+
+All PI's will be moved from vlan 10 to vlan 20(access for only servers) 
+
+
+
+Future Cluster Plans:
+
+The cluster will be 2 worker nodes and 1 control node.
+
+Currently doing reserach on which kubernetes service to run. The plan is to move the arduino plus self hosted Graphana 
+inside the cluster. I will try out other services like Jellyfin, Pi-hole and some testing use cases.
+
+I will be using GIT pages to write down my review and journey.
+
+
+
 
