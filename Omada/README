@@ -1,3 +1,4 @@
 The Omada setup guide will explain how to have a similar network design like mine. This will continue to grow, but as of now I only have ER605 router and the OC200 controller.
 The controller shows the clients as well, through the router management. It gives an easier view of the devices, as trubleshooting makes it easier. The EAP650 is not hooked up yet but will be in the future.
 
+Any issues encountered I will add under the Troubleshooting directory.
