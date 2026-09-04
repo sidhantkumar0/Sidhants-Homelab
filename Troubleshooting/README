@@ -1,0 +1,417 @@
+
+# Troubleshootingm Issue 1: Moving the Homelab from VLAN 1 to VLAN 10
+
+## Problem
+
+One of the first challenges I encountered while securing my homelab was moving my devices from the default VLAN 1 to a dedicated management VLAN (VLAN 10).
+
+The ER605 router was initially using its default LAN configuration:
+
+* **Default Gateway:** `192.168.0.1`
+* **Network:** `192.168.0.0/24`
+* **DHCP Range:** `192.168.0.1 - 192.168.0.254`
+* **VLAN:** 1
+
+Initially, all six of my homelab devices were connected to VLAN 1. While this worked, I wanted to start following a more structured network design and separate management traffic from the default network.
+
+I created **VLAN 10 – Management** and configured the Cisco Layer 2 switch to carry both VLAN 1 and VLAN 10 over the uplink to the ER605.
+
+The plan was to move the devices from VLAN 1 to VLAN 10 one at a time.
+
+However, I quickly ran into an issue with the **Omada OC200 controller**.
+
+The OC200 manages the ER605, so moving the controller to VLAN 10 while the router was still primarily operating on VLAN 1 caused communication between the controller and router to break. The OC200 became unreachable, and the router began reporting that the controller connection had been lost.
+
+---
+
+## What Happened
+
+The main issue was that I was changing the VLAN assignments before the router, controller, and DHCP configuration were ready for the new VLAN.
+
+For example:
+
+```text
+Before:
+
+ER605
+192.168.0.1
+     |
+   VLAN 1
+     |
+Cisco Switch
+     |
+     +-- OC200
+     +-- Raspberry Pi
+     +-- Admin Laptop
+     +-- Other Devices
+```
+
+I then attempted to move the switch ports to VLAN 10:
+
+```text
+After:
+
+ER605
+     |
+ VLAN 1 + VLAN 10
+     |
+Cisco Switch
+     |
+   VLAN 10
+     |
+     +-- OC200
+     +-- Raspberry Pi
+     +-- Admin Laptop
+     +-- Other Devices
+```
+
+The problem was that VLAN 10 did not yet have the proper Layer 3/DHCP configuration on the ER605. As a result, devices moved to VLAN 10 could not obtain the correct IP configuration or communicate properly with the router.
+
+The OC200 was particularly important because it was responsible for managing the ER605.
+
+---
+
+# The Fix
+
+Instead of moving everything at once, I moved the devices over gradually.
+
+### 1. Move non-critical devices first
+
+I started by moving devices that were not critical to the network, such as the Raspberry Pis, to VLAN 10.
+
+After changing the VLAN assignment, I waited for the old DHCP lease to expire or be removed so the device could obtain a new address from the VLAN 10 DHCP scope.
+
+This allowed me to verify that VLAN 10 was functioning before moving the more important management devices.
+
+---
+
+### 2. Move the Admin Laptop to VLAN 10
+
+Next, I moved my administration laptop to VLAN 10.
+
+Once the laptop received an IP address from the VLAN 10 network, I used it to continue configuring the network.
+
+This gave me a way to administer the network from VLAN 10 instead of relying on VLAN 1.
+
+---
+
+### 3. Temporarily remove the ER605 from Omada management
+
+Because the OC200 manages the ER605, I needed to temporarily separate the router from the controller.
+
+I went into the OC200 and **forgot the ER605**.
+
+This allowed me to access the ER605's standalone management interface and configure the new VLAN directly on the router.
+
+This was an important step because attempting to change the router's network configuration while it was still being managed by the OC200 caused the controller-to-router connection to become unreliable.
+
+---
+
+### 4. Create the VLAN 10 network on the ER605
+
+I then configured VLAN 10 on the ER605 with its own IP addressing scheme.
+
+The new network was:
+
+```text
+VLAN:              10
+Network:           192.168.10.0/24
+Gateway:           192.168.10.1
+DHCP Range:        192.168.10.100 - 192.168.10.200
+```
+
+I excluded the gateway address from the DHCP pool so that `192.168.10.1` remained reserved for the router.
+
+---
+
+### 5. Move the OC200 to VLAN 10
+
+Once VLAN 10 and its DHCP scope were working, I moved the OC200 to VLAN 10.
+
+After a short period, the ER605 detected the OC200 as a client on the new VLAN.
+
+The OC200 received a new IP address from the VLAN 10 DHCP scope.
+
+I then accessed the OC200 using its new VLAN 10 IP address.
+
+---
+
+### 6. Verify all devices
+
+Before making the configuration permanent, I checked the ER605 client list and verified that the devices were now receiving addresses from the VLAN 10 network.
+
+I also verified that I could:
+
+* Access the OC200
+* Access the ER605
+* Reach the Raspberry Pis
+* Reach the Cisco switch
+* Manage the network from the Admin Laptop
+* See the devices receiving `192.168.10.x` addresses
+
+This confirmed that VLAN 10 was functioning correctly.
+
+---
+
+### 7. Give the OC200 a static IP
+
+Once everything was working, I assigned the OC200 a static IP address on VLAN 10.
+
+This is important because the ER605 needs to know where the Omada controller is located. If the controller's DHCP address changed, the router could potentially lose communication with the controller again.
+
+I then updated the controller information in the appropriate Omada settings so that the ER605 knew the new IP address of the OC200.
+
+---
+
+### 8. Re-adopt the ER605
+
+After the network configuration was in place, I returned to the OC200 and found the ER605 under the device list.
+
+I selected the router and started the adoption process.
+
+The important part was that the ER605 retained the VLAN configuration that had already been created.
+
+Once the adoption completed, the OC200 was once again managing the ER605.
+
+At this point, the devices appeared correctly in the Omada controller and were using the new VLAN 10 addressing.
+
+---
+
+# Current Status
+
+The migration to VLAN 10 is working, but there is still one issue I am investigating.
+
+Currently, the Cisco switch's uplink to the ER605 is configured as a trunk carrying both VLAN 1 and VLAN 10.
+
+```text
+Cisco 3850
+   |
+   | Trunk
+   | VLAN 1 + VLAN 10
+   |
+ER605
+```
+
+I would ultimately like to remove VLAN 1 from the trunk and operate the homelab entirely through VLAN 10 where appropriate.
+
+However, when I remove VLAN 1 from the trunk, the ER605 loses communication with the OC200 and reports a **"heartbeat missed"** condition.
+
+This indicates that there is still a dependency on VLAN 1 somewhere in the current management path.
+
+I am continuing to troubleshoot this rather than simply leaving the configuration as-is.
+
+---
+
+# What I Learned
+
+This troubleshooting process taught me that moving devices to a new VLAN is not simply a matter of changing the switch port.
+
+The entire management path needs to be considered:
+
+```text
+Device
+   ↓
+Cisco Switch
+   ↓
+VLAN
+   ↓
+ER605
+   ↓
+DHCP / Gateway
+   ↓
+OC200
+   ↓
+Omada Management
+```
+
+Changing one part of this path without preparing the others can result in losing management access.
+
+The biggest lesson was to **migrate the network incrementally rather than changing every device at once**.
+
+I also learned that the Omada controller introduces an additional dependency because the OC200 needs reliable connectivity to the devices it manages, particularly the ER605.
+
+The remaining VLAN 1 dependency is something I plan to investigate further as I continue developing the homelab.
+
+
+
+
+# Troubleshooting Issue 2: OC200 Would Not Start
+
+## Problem
+
+When I first received my used **Omada OC200 controller**, it did not come with a power cable.
+
+I initially tried powering it using a **Micro-USB cable connected to my Raspberry Pi**. However, the OC200 did not appear to be working, and I could not access the controller's web interface using its default IP address.
+
+At first, I wasn't sure whether the issue was with the OC200 itself, the network connection, or the way I was powering it.
+
+---
+
+## Troubleshooting
+
+My first thought was that the Micro-USB cable might be the problem.
+
+Since the controller was not powering up properly, I decided to try a different Micro-USB cable.
+
+I also changed the power source. Instead of powering the OC200 from the Raspberry Pi, I connected the Micro-USB cable to a dedicated power adapter and plugged it directly into a wall outlet.
+
+After making these changes, the OC200 finally started working and its management page became accessible through the default IP address.
+
+---
+
+## The Fix
+
+The issue was related to how I was powering the OC200.
+
+I switched to:
+
+```text
+Wall Outlet
+     ↓
+Power Adapter
+     ↓
+Micro-USB Cable
+     ↓
+OC200
+```
+
+Once the controller had a proper power source, I was able to access its web interface and continue with the initial setup.
+
+---
+
+## What I Learned
+
+This was a simple issue, but it reminded me not to immediately assume that a networking problem is actually a networking problem.
+
+When a device is completely unreachable, I should first verify the basics:
+
+* Is the device receiving power?
+* Is the power cable working?
+* Is the power source sufficient?
+* Are the link/activity LEDs showing anything?
+* Is the device actually booting?
+
+In this case, I initially focused on the IP address and network connection when the real problem was much more basic: **the controller needed a proper power source.**
+
+
+
+
+
+# Troubleshooting Issue 3: Cisco Switch Power Loss and Unsaved Configuration
+
+## Problem
+
+While working on the physical organization of my homelab, I started replacing some of my Ethernet cables with cables that I had made myself. The goal was to make the network rack and cabling cleaner and more organized.
+
+While changing the cables, I accidentally disconnected the power cable from my Cisco switch.
+
+This created two separate problems.
+
+First, I had recently made configuration changes on the Cisco switch but had **not saved them to the startup configuration** using `write memory`.
+
+Second, because the Cisco switch was temporarily powered off, the devices connected through it lost network connectivity.
+
+When the switch came back online, the unsaved configuration changes were no longer present.
+
+---
+
+## What Happened
+
+The sequence was essentially:
+
+```text
+Made configuration changes
+        ↓
+Did NOT save configuration
+        ↓
+Changed Ethernet cables
+        ↓
+Cisco switch power cable disconnected
+        ↓
+Switch rebooted
+        ↓
+Unsaved configuration was lost
+        ↓
+Configuration had to be entered again
+```
+
+At the same time, the Omada controller detected that the ER605 was no longer reachable.
+
+The controller showed the router as disconnected because the Cisco switch was still going through its startup process and the network path between the devices had not yet been restored.
+
+---
+
+## The Fix
+
+I first re-entered the configuration changes that had been lost when the switch rebooted.
+
+After making the changes again, I saved the configuration using:
+
+```text
+write memory
+```
+
+This writes the current running configuration to the startup configuration so that the changes survive a reboot.
+
+I then allowed the Cisco switch to finish starting up and restoring connectivity between the network devices.
+
+The ER605 still appeared disconnected from the OC200 for a period of time, so I performed a **power cycle on the ER605**.
+
+A power cycle reboots the router but does not erase its saved configuration.
+
+After approximately 10 minutes, the ER605 appeared as connected again in the Omada controller.
+
+---
+
+## What I Learned
+
+This incident reinforced two important lessons for me.
+
+### 1. Save configuration changes
+
+Making a configuration change and forgetting to save it can result in losing that work after a reboot.
+
+For the Cisco switch, I now make sure to save important changes after verifying that they work:
+
+```text
+write memory
+```
+
+The configuration should also be verified when necessary with commands such as:
+
+```text
+show running-config
+show startup-config
+```
+
+### 2. Don't panic when network devices appear disconnected after a reboot
+
+The OC200 initially showing the ER605 as disconnected did not necessarily mean that the router configuration was broken.
+
+The Cisco switch had just restarted, so the network path needed time to come back online.
+
+After allowing the devices to restart and then power cycling the ER605, the controller eventually detected the router again.
+
+This taught me to distinguish between an actual configuration problem and a temporary connectivity problem caused by equipment restarting.
+
+---
+
+## Takeaway
+
+This was an accidental mistake caused by working on the physical cabling, but it was still a useful learning experience.
+
+It showed me that **physical changes can have consequences for the logical network configuration**, especially when working with switches, routers, and controllers.
+
+Going forward, I want to:
+
+* Save Cisco configurations after important changes.
+* Verify the startup configuration before making physical changes.
+* Change cables one at a time where possible.
+* Check device status after making physical changes.
+* Give network equipment enough time to fully boot before assuming something is broken.
+
+
+
+
+
+
