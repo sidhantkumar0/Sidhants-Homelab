@@ -3,7 +3,7 @@
 
 Welcome to my homelab project.
 
-This repository documents my journey building and expanding a personal homelab — a real, hands-on environment for learning networking, Linux, infrastructure, monitoring, and eventually containerization and Kubernetes.
+This repository documents my journey building and expanding a personal homelab — a real, hands-on environment for learning networking, Linux, infrastructure, monitoring, containerization, and Kubernetes.
 
 Coming from a background in Nokia networking, I wanted a place to apply what I already know and push into areas I haven't worked with before. This is a living project: the hardware, network design, and services here will keep changing as I learn.
 
@@ -24,7 +24,7 @@ Goals for this project:
 - Build a Raspberry Pi–based infrastructure cluster
 - Strengthen Linux administration skills
 - Learn monitoring and observability (Prometheus/Grafana)
-- Learn containerization and, eventually, Kubernetes
+- Learn containerization and Kubernetes (K3s cluster is live)
 - Practice troubleshooting real infrastructure problems
 - Document the process — successes and failures — using Git and GitHub
 
@@ -35,46 +35,25 @@ Goals for this project:
 | Category | Hardware |
 |---|---|
 | ISP Gateway| Rogers Router |
-| Router | TP-Link ER605 |
-| SDN Controller | TP-Link OC200 |
-| Core Switch | Cisco Catalyst WS-C3850-24T-E (data-only, no PoE) |
-| Compute | 3x Raspberry Pi |
-| Microcontroller | Arduino (connected to a Pi via USB for data collection) |
+| Router | TP-Link ER605 (Homelab-Router, 192.168.0.1) |
+| SDN Controller | TP-Link OC200 (Homelab-Controller, 192.168.10.101) |
+| Core Switch | Cisco Catalyst WS-C3850-24T-E (data-only, no PoE), 192.168.10.30 |
+| Compute | 4x Raspberry Pi 4 (K3s cluster) |
+| Virtualization | Proxmox Server — repurposed PC (32GB RAM, 500GB SSD), 192.168.20.100 |
+| Microcontroller | Arduino (connected to PI-Server1 via USB for sensor data collection) |
 
 ---
 
 ## 🌐 Network Topology
 
-```text
-                                             Internet
-                            │
-                       Rogers XB8
-                     (Cable modem/gateway)
-                            │
-                         ER605
-                         (Router)
-                            │
-                    ┌───────┴───────┐
-                    │  802.1Q Trunk │
-                    │    VLAN 10    │
-                    └───────┬───────┘
-                            ▼
-                       Cisco 3850
-                      (Core switch)
-                            │
-                        VLAN 10
-                            │
-        ┌──────────┬────────┼────────┬──────────┐
-        │           │       │       │          │
-        ▼           ▼       ▼       ▼          ▼
-     OC200        Pi #1    Pi #2    Pi #3       Laptop
-                    │
-                   USB
-                    │
-                    ▼
-                 Arduino
+![Homelab Network Topology](./Network/homelab_network_diagram_v5.png)
 
-The network currently runs as a single flat VLAN 10 across the trunk to the Cisco 3850 (VLAN 1 has been retired). Full topology history and diagrams live in [`/network/`](./network/).
+The lab is segmented into two active VLANs. The Homelab-Router (TP-Link, 192.168.0.1) feeds the core switch (192.168.10.30) over a trunk on port 1:
+
+- **VLAN 10 – Management** (192.168.10.0/24): Homelab-Controller (.101), Admin Laptop
+- **VLAN 20 – Servers** (192.168.20.0/24): 4x Raspberry Pi K3s cluster (.101–.104), Proxmox Server (.100)
+
+Full topology history and diagrams live in [`./Network/`](./Network/).
 
 ---
 
@@ -83,55 +62,61 @@ The network currently runs as a single flat VLAN 10 across the trunk to the Cisc
 | VLAN | Name | Network | Status |
 |---|---|---|---|
 | 10 | Management | 192.168.10.0/24 | 🟢 Active |
-| 20 | Servers | TBD | 🔵 Planned |
+| 20 | Servers | 192.168.20.0/24 | 🟢 Active |
 | 30 | Clients | TBD | 🔵 Planned |
 | 40 | IoT | TBD | 🔵 Planned |
 | 50 | Cyber Lab | TBD | 🔵 Planned |
 
-All infrastructure (OC200, Raspberry Pis, Cisco management) currently sits on VLAN 10. Additional VLANs will be rolled out gradually as new device categories are added. Detailed VLAN design and DHCP configuration are documented in [`/network/`](./network/).
+Management devices (OC200, switch management, admin laptop) sit on VLAN 10. All server infrastructure (Raspberry Pis, Proxmox) sits on VLAN 20. Detailed VLAN design and DHCP configuration are documented in [`./Network/`](./Network/).
 
 ---
 
 ## 🔌 Cisco Equipment
 
-The Cisco Catalyst 3850 is the core switch for the lab, currently used as a Layer 2 switch — VLANs, trunking, access ports, 802.1Q, MAC/ARP tables. Layer 3 inter-VLAN routing is not in use yet; the ER605 handles routing for now.
+The Cisco Catalyst 3850 is the core switch for the lab, currently used as a Layer 2 switch — VLANs, trunking, access ports, 802.1Q, MAC/ARP tables. The uplink trunk (Gi1/0/1) carries VLAN 10 and VLAN 20. Layer 3 inter-VLAN routing is not in use on the switch yet; the TP-Link router handles routing for now.
 
-Configs live in [`/cisco/configs/`](./cisco/configs/)
+Configs live in [`./Cisco/Configs`](./Cisco/Configs)
 
 ---
 
 ## 📡 Omada Equipment
 
-The ER605 (router) and OC200 (SDN controller) form the Omada side of the network, with an EAP650 providing Wi-Fi. Getting the OC200 and ER605 adopted and communicating across the Cisco trunk involved a fair amount of troubleshooting — VLAN migration, controller connectivity, and mixed-vendor quirks between Omada and Cisco.
+The ER605 (router) and OC200 (SDN controller) form the Omada side of the network, with an EAP650 access point planned but not hooked up yet. Getting the OC200 and ER605 adopted and communicating across the Cisco trunk involved a fair amount of troubleshooting — VLAN migration, controller connectivity, and mixed-vendor quirks between Omada and Cisco.
 
-Since Omada is mostly GUI-configured, its documentation is screenshot- and decision-based rather than config files. See [`/omada/`](./omada/).
+Since Omada is mostly GUI-configured, its documentation is screenshot- and decision-based rather than config files. See [`./Omada/`](./Omada/).
 
 ---
 
 ## 🥧 Raspberry Pi Cluster
 
-The lab currently runs 3 individual raspberry Pi's, connected to VLAN 10 with SSH enabled. As of now I have an Arduino connected via USB for data collection.
+The lab runs a **4-node K3s Kubernetes cluster** on Raspberry Pi 4s, all on VLAN 20 with SSH enabled:
 
-The future plans for it are creating a 3-node cluster and using Kubernetes on it. Some services I might run are: 
+| Node | IP | Role |
+|---|---|---|
+| pi-server1 | 192.168.20.101 | K3s agent — Arduino attached via USB |
+| pi-server2 | 192.168.20.102 | K3s agent |
+| pi-server3 | 192.168.20.103 | K3s server (control plane) |
+| pi-server4 | 192.168.20.104 | K3s agent |
 
-- Linux server experiments
-- Monitoring
-- Containers and (eventually) a K3s Kubernetes cluster
-- Storage experiments
+The Arduino sensor exporter runs as a containerized workload in the cluster (pinned to pi-server1), and the monitoring stack lives in-cluster too (see below).
 
-Setup notes and hardware decisions (Pi 4 vs. Pi 400, storage choices) are in [`/raspberry-pi/`](./raspberry-pi/).
+Setup notes and hardware details are in [`./Raspberry-Pi/`](./Raspberry-Pi/).
 
 ---
 
 ## 📊 Monitoring
 
-Early experimentation with Prometheus and Grafana for infrastructure visibility — Linux metrics, dashboards, and eventually monitoring the Pi cluster and any Kubernetes workloads. See [`/monitoring/`](./monitoring/).
+Prometheus and Grafana run **inside the K3s cluster** via `kube-prometheus-stack` (namespace `monitoring`):
+
+- Node metrics from all four Pis via node-exporter
+- Custom `arduino-exporter` pod (pinned to pi-server1, reads the Arduino over `/dev/ttyACM0`) exposing temperature, humidity, and heat-index metrics, scraped by Prometheus via a ServiceMonitor
+- Grafana dashboards, including a custom **Homelab-Thermo** dashboard for the Arduino sensor data and per-node compute views for the cluster
 
 ---
 
 ## 🛠️ Troubleshooting
 
-A core part of this project is documenting problems, not just working configs — VLAN migrations, OC200/ER605 adoption issues, DHCP quirks, and mixed-vendor telemetry limitations between Cisco and Omada. Each writeup covers the problem, investigation steps, root cause, and fix. See [`/troubleshooting/`](./troubleshooting/).
+A core part of this project is documenting problems, not just working configs — VLAN migrations, OC200/ER605 adoption issues, DHCP quirks, and mixed-vendor telemetry limitations between Cisco and Omada. Each writeup covers the problem, investigation steps, root cause, and fix. See [`./Troubleshooting/`](./Troubleshooting/).
 
 ---
 
@@ -140,10 +125,14 @@ A core part of this project is documenting problems, not just working configs �
 - [x] Initial network build (Rogers gateway → ER605 → Cisco 3850)
 - [x] Cisco 3850 added and configured as core switch
 - [x] VLAN 10 management network deployed
+- [x] VLAN 20 server network deployed (K3s Pis + Proxmox)
 - [x] OC200 adopted and migrated onto the management VLAN
 - [x] ER605 adoption and Omada controller connectivity resolved
 - [x] Arduino connected to a Pi for data collection
-- [x] Initial Prometheus/Grafana experimentation
+- [x] 4-node K3s Kubernetes cluster built (1 server + 3 agents)
+- [x] Prometheus + Grafana deployed in-cluster via kube-prometheus-stack
+- [x] Arduino sensor exporter containerized and running in K3s
+- [x] Proxmox virtualization host added on VLAN 20
 
 ---
 
@@ -151,23 +140,41 @@ A core part of this project is documenting problems, not just working configs �
 
 **Networking:** VLANs, 802.1Q trunking, Layer 2/3 concepts, DHCP, ARP, Cisco IOS, Omada SDN
 **Linux:** administration, SSH, services, system monitoring
-**Infrastructure:** Raspberry Pi cluster management, monitoring, troubleshooting mixed-vendor networks
-**Other:** Git/GitHub documentation workflow, early containerization concepts
+**Infrastructure:** Kubernetes (K3s) workloads and Helm, Raspberry Pi cluster management, Proxmox virtualization, monitoring, troubleshooting mixed-vendor networks
+**Other:** Git/GitHub documentation workflow, containerization
 
 ---
 
 ## 🚀 Future Plans
 
-- **Server VLAN (20)** — dedicated network for server infrastructure
-- **Kubernetes** — turn the Raspberry Pi cluster into a K3s cluster
-- **NAS / Storage** — network storage and backups using Pi hardware
-- **Proxmox** — introduce a dedicated virtualization host
+- **Pi-hole** — network-wide ad blocking and DNS, running in K3s
+- **NAS / Storage** — network storage and backups (Proxmox host / Pi hardware)
 - **IoT VLAN (40)** — isolated network for Arduino/sensor projects
 - **Cybersecurity Lab (50)** — isolated environment for security testing and traffic analysis
 
 ---
 
 ## 📁 Repository Structure
+
+```text
+Sidhants-Homelab/
+├── README.md                  # Project overview (this file)
+├── Cisco/
+│   └── Configs                # Cisco Catalyst 3850 running-config (secrets redacted)
+├── Docs/
+│   └── Helpful-Links.md       # Useful documentation links
+├── Network/
+│   ├── README.md                    # Switch and VLAN setup notes
+│   ├── Cisco-port-layout.png        # Physical port map
+│   └── homelab_network_diagram_v5.png  # Current topology diagram
+├── Omada/
+│   ├── README.md                    # Omada notes
+│   └── Homelab-Omada-Setup Guide.pdf
+├── Raspberry-Pi/
+│   └── README.md              # Pi hardware + K3s cluster notes
+└── Troubleshooting/
+    └── README.md              # Problem writeups (VLAN migration, adoption issues, …)
+```
 
 ---
 
