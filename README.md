@@ -46,7 +46,7 @@ Goals for this project:
 
 ## 🌐 Network Topology
 
-![Homelab Network Topology](./Network/homelab_network_diagram_v5.png)
+![Homelab Network Topology](./Network/Updated_Topo.png)
 
 The lab is segmented into two active VLANs. The Homelab-Router (TP-Link, 192.168.0.1) feeds the core switch (192.168.10.30) over a trunk on port 1:
 
@@ -166,7 +166,7 @@ Sidhants-Homelab/
 ├── Network/
 │   ├── README.md                    # Switch and VLAN setup notes
 │   ├── Cisco-port-layout.png        # Physical port map
-│   └── homelab_network_diagram_v5.png  # Current topology diagram
+│   └── Updated_Topo.png  # Current topology diagram
 ├── Omada/
 │   ├── README.md                    # Omada notes
 │   └── Homelab-Omada-Setup Guide.pdf
