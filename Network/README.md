@@ -24,7 +24,6 @@ The current port assignments are:
 
 Port 1 is the uplink to the router and is configured as a trunk, carrying VLAN 10 and VLAN 20.
 
-The remaining ports are currently configured as access ports. The current topology diagram is [`homelab_network_diagram_v5.png`](./homelab_network_diagram_v5.png).
 
 ## Initial Configuration Issues
 
