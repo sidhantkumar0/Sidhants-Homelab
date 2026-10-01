@@ -1,0 +1,38 @@
+title: Sid's Homelab
+author: Sid
+description: >-
+  Homelab journal — what I build, what breaks, and what I learn.
+  A 4-node Raspberry Pi K3s cluster, Cisco networking, Proxmox, and an Arduino keeping an eye on the room.
+url: "https://sidhantkumar0.github.io"
+baseurl: "/Sidhants-Homelab"
+
+remote_theme: abhinavs/moonwalk
+
+theme_config:
+  appearance: "dark" # can be "light", "dark" or "auto"
+  appearance_toggle: true
+  date_format: "%Y-%m-%d"
+  show_description: true
+  show_navbar: true
+  show_footer: true
+  show_copyright: true
+  show_projects: true # project cards on the home page, defined in _data/home.yml
+  show_blog: true # latest posts on the home page
+  show_old_projects: false
+  show_misc_list: false
+  show_reading_time: true
+  show_tags: true
+  show_code_copy: true
+  show_progress_bar: true
+  show_back_to_top: true
+  show_post_nav: true
+  show_toc: true
+
+home:
+  title_projects: Projects
+  title_blog: Journey
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-feed
+  - jekyll-sitemap
