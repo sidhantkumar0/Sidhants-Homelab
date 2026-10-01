@@ -1,0 +1,32 @@
+# Alertmanager email routing for the homelab.
+# Applied with: sudo kubectl apply -f homelab-email-alertmanagerconfig.yaml  (on pi-server3)
+# Requires the Gmail app password to be stored first (never committed):
+#   sudo kubectl create secret generic gmail-app-password -n monitoring \
+#     --from-literal=password='<16-LETTER-APP-PASSWORD-NO-SPACES>'
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: homelab-email
+  namespace: monitoring
+spec:
+  route:
+    receiver: homelab-email
+    groupBy: ["alertname"]
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    matchers:
+    - name: alertname
+      value: Watchdog
+      matchType: "!="
+  receivers:
+  - name: homelab-email
+    emailConfigs:
+    - to: "sidhantkumar1001@gmail.com"
+      from: "sidhantkumar1001@gmail.com"
+      smarthost: "smtp.gmail.com:587"
+      authUsername: "sidhantkumar1001@gmail.com"
+      authPassword:
+        name: gmail-app-password
+        key: password
+      sendResolved: true

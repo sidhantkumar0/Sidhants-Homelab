@@ -1,0 +1,52 @@
+# Custom Prometheus alert rules for the homelab.
+# Applied with: sudo kubectl apply -f homelab-custom-alerts-prometheusrule.yaml  (on pi-server3)
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-custom-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: homelab.rules
+    interval: 30s
+    rules:
+    - alert: ArduinoHighTemperature
+      expr: arduino_temperature_celsius > 30
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Room temperature above 30C ({{ $value }}C)"
+        description: "Arduino DHT11 on pi-server1 reports {{ $value }}C for more than 5 minutes."
+    - alert: ArduinoSensorStale
+      expr: absent(arduino_temperature_celsius)
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Arduino sensor stopped reporting"
+        description: "No metrics from the Arduino exporter for 10 minutes. Check the exporter pod on pi-server1 and the USB connection."
+    - alert: NodeDown
+      expr: up{job="node-exporter"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Node {{ $labels.instance }} is down"
+        description: "node-exporter on {{ $labels.instance }} has not reported for 5 minutes."
+    - alert: NodeHighCpuLoad
+      expr: 100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 85
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU load on {{ $labels.instance }}"
+    - alert: NodeHighMemoryUsage
+      expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage on {{ $labels.instance }}"

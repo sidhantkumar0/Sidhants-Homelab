@@ -111,6 +111,8 @@ Prometheus and Grafana run **inside the K3s cluster** via `kube-prometheus-stack
 - Node metrics from all four Pis via node-exporter
 - Custom `arduino-exporter` pod (pinned to pi-server1, reads the Arduino over `/dev/ttyACM0`) exposing temperature, humidity, and heat-index metrics, scraped by Prometheus via a ServiceMonitor
 - Grafana dashboards, including a custom **Homelab-Thermo** dashboard for the Arduino sensor data and per-node compute views for the cluster
+- **Headlamp** — in-cluster Kubernetes dashboard (namespace `headlamp`, NodePort `30937`), token login via a `headlamp-admin` ServiceAccount
+- **Alertmanager** — email alerts via Gmail SMTP: node down, disk/memory/CPU pressure, pod crash-looping, Arduino temperature over 30°C, and sensor-stale detection, driven by a custom `PrometheusRule` (`homelab-custom-alerts`)
 
 ---
 
@@ -133,6 +135,8 @@ A core part of this project is documenting problems, not just working configs �
 - [x] Prometheus + Grafana deployed in-cluster via kube-prometheus-stack
 - [x] Arduino sensor exporter containerized and running in K3s
 - [x] Proxmox virtualization host added on VLAN 20
+- [x] Headlamp Kubernetes dashboard deployed in K3s (NodePort 30937, token auth)
+- [x] Alertmanager email alerting configured (node/sensor/resource alerts via Gmail SMTP)
 
 ---
 
@@ -163,6 +167,9 @@ Sidhants-Homelab/
 │   └── Configs                # Cisco Catalyst 3850 running-config (secrets redacted)
 ├── Docs/
 │   └── Helpful-Links.md       # Useful documentation links
+├── K3s/
+│   ├── README.md              # Cluster services: Headlamp, Alertmanager
+│   └── manifests/             # Applied manifests (PrometheusRule, AlertmanagerConfig)
 ├── Network/
 │   ├── README.md                    # Switch and VLAN setup notes
 │   ├── Cisco-port-layout.png        # Physical port map
