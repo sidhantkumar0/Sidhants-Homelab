@@ -17,6 +17,7 @@ spec:
       for: 5m
       labels:
         severity: warning
+        namespace: monitoring
       annotations:
         summary: "Room temperature above 30C ({{ $value }}C)"
         description: "Arduino DHT11 on pi-server1 reports {{ $value }}C for more than 5 minutes."
@@ -25,6 +26,7 @@ spec:
       for: 10m
       labels:
         severity: warning
+        namespace: monitoring
       annotations:
         summary: "Arduino sensor stopped reporting"
         description: "No metrics from the Arduino exporter for 10 minutes. Check the exporter pod on pi-server1 and the USB connection."
@@ -33,6 +35,7 @@ spec:
       for: 5m
       labels:
         severity: critical
+        namespace: monitoring
       annotations:
         summary: "Node {{ $labels.instance }} is down"
         description: "node-exporter on {{ $labels.instance }} has not reported for 5 minutes."
@@ -41,6 +44,7 @@ spec:
       for: 10m
       labels:
         severity: warning
+        namespace: monitoring
       annotations:
         summary: "High CPU load on {{ $labels.instance }}"
     - alert: NodeHighMemoryUsage
@@ -48,5 +52,6 @@ spec:
       for: 10m
       labels:
         severity: warning
+        namespace: monitoring
       annotations:
         summary: "High memory usage on {{ $labels.instance }}"

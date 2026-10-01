@@ -51,5 +51,5 @@ The `AlertmanagerConfig` (`homelab-email`) is picked up automatically by the Pro
 
 - The old Headlamp chart URL (`headlamp-k8s.github.io/headlamp/`) 404s — the chart moved to `https://kubernetes-sigs.github.io/headlamp/`.
 - The operator merges `AlertmanagerConfig` resources into a **gzipped** generated secret (`alertmanager.yaml.gz`, not `alertmanager.yaml`) — decode with `base64 -d | gunzip` when inspecting it.
-- The operator injects a `namespace="monitoring"` matcher into AlertmanagerConfig routes, so test alerts fired at the API need that label to route.
+- The operator injects a `namespace="monitoring"` matcher into AlertmanagerConfig routes, so every alert needs that label to reach the email receiver — API test alerts need it set manually, and `PrometheusRule` alerts need `namespace: monitoring` in their rule labels too (Prometheus doesn't attach it on its own). Without it, alerts fall through to the null receiver silently: no error, no email. This one cost a full debugging session on 2026-10-01.
 - Gmail app passwords must be used with **no spaces**; revoke and rotate if one ever lands in chat or logs.
