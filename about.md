@@ -34,4 +34,4 @@ I'm Sidhant Kumar. I learn best with cables in my hands — so while studying ne
 
 ## Resume
 
-[Download my resume]({{ '/assets/Sidhant_Kumar_Resume.pdf' | relative_url }})
+[Download my resume]({{ '/assets/Sidhant%20Kumar%20Resume.pdf' | relative_url }})
