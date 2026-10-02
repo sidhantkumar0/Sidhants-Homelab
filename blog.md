@@ -3,4 +3,4 @@ layout: blog
 title: Blog
 ---
 
-The journey so far — posts coming soon.
+Whatever I'm working on — homelab builds, networking, and everything in between.

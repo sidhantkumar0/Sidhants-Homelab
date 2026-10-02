@@ -1,8 +1,7 @@
-title: Sid's Homelab
-author: Sid
+title: Sidhant's Homelab
+author: Sidhant Kumar
 description: >-
-  Homelab journal — what I build, what breaks, and what I learn.
-  A 4-node Raspberry Pi K3s cluster, Cisco networking, Proxmox, and an Arduino keeping an eye on the room.
+  Sidhant Kumar's projects and notes — homelab builds, networking, and whatever I'm working on.
 url: "https://sidhantkumar0.github.io"
 baseurl: "/Sidhants-Homelab"
 
@@ -16,7 +15,7 @@ theme_config:
   show_navbar: true
   show_footer: true
   show_copyright: true
-  show_projects: true # project cards on the home page, defined in _data/home.yml
+  show_projects: false # projects have their own page now
   show_blog: true # latest posts on the home page
   show_old_projects: false
   show_misc_list: false
@@ -30,7 +29,7 @@ theme_config:
 
 home:
   title_projects: Projects
-  title_blog: Journey
+  title_blog: Blog
 
 plugins:
   - jekyll-remote-theme

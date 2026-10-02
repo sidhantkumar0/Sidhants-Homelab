@@ -8,22 +8,10 @@ navbar_entries:
   - title: projects
     url: projects
 
-project_entries:
-  - title: K3s Cluster
-    url: https://github.com/sidhantkumar0/Sidhants-Homelab/tree/main/K3s
-    desc: 4-node Raspberry Pi 4 cluster — the foundation everything in the lab runs on.
-  - title: Monitoring & Alerting
-    url: https://github.com/sidhantkumar0/Sidhants-Homelab/tree/main/K3s
-    desc: Prometheus, Grafana and Alertmanager, with email alerts when the lab needs attention.
-  - title: Arduino Sensor
-    url: https://github.com/sidhantkumar0/Sidhants-Homelab/tree/main/Raspberry-Pi
-    desc: DHT11 temperature/humidity exporter feeding live room data into Prometheus.
-  - title: Network & VLANs
-    url: https://github.com/sidhantkumar0/Sidhants-Homelab/tree/main/Network
-    desc: Cisco Catalyst 3850, VLANs 10 and 20, topology and switch configs.
-
 footer_entries:
+  - title: email
+    url: mailto:sidhantkumar1001@gmail.com
   - title: github
     url: https://github.com/sidhantkumar0
-  - title: feed
-    url: feed.xml
+  - title: linkedin
+    url: https://www.linkedin.com/in/sidhant-kumar-
