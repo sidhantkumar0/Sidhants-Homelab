@@ -1,37 +1,21 @@
-title: Sidhant's Homelab
-author: Sidhant Kumar
-description: >-
-  Sidhant Kumar's projects and notes — homelab builds, networking, and whatever I'm working on.
+title: Sidhant Kumar
+description: "Sidhant Kumar's personal website — homelab blogging, projects, and experience."
 url: "https://sidhantkumar0.github.io"
 baseurl: "/Sidhants-Homelab"
 
-remote_theme: abhinavs/moonwalk
+remote_theme: chesterhow/tale
 
-theme_config:
-  appearance: "dark" # can be "light", "dark" or "auto"
-  appearance_toggle: true
-  date_format: "%Y-%m-%d"
-  show_description: true
-  show_navbar: true
-  show_footer: true
-  show_copyright: true
-  show_projects: false # projects have their own page now
-  show_blog: true # latest posts on the home page
-  show_old_projects: false
-  show_misc_list: false
-  show_reading_time: true
-  show_tags: true
-  show_code_copy: true
-  show_progress_bar: true
-  show_back_to_top: true
-  show_post_nav: true
-  show_toc: true
+author:
+  name: Sidhant Kumar
+  url: https://github.com/sidhantkumar0
+  email: sidhantkumar1001@gmail.com
 
-home:
-  title_projects: Projects
-  title_blog: Blog
+markdown: kramdown
 
 plugins:
   - jekyll-remote-theme
   - jekyll-feed
   - jekyll-sitemap
+  - jekyll-seo-tag
+
+permalink: /:year-:month-:day/:title
