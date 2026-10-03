@@ -1,0 +1,12 @@
+---
+---
+
+@import "type-on-strap";
+
+// Uniform portfolio thumbnails: every project image gets the same 4:3 shape,
+// cropped cleanly with object-fit instead of rendering at its natural size.
+.portfolio-cell img {
+  width: 100%;
+  aspect-ratio: 1.3333;
+  object-fit: cover;
+}

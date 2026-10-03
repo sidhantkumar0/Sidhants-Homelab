@@ -5,18 +5,19 @@ permalink: /about/
 position: 1
 ---
 
-I'm Sidhant Kumar. I learn best with cables in my hands — so while studying networks, I built one at home: VLANs, a Kubernetes cluster, monitoring, the works. Breaking things in my own lab taught me more than any lecture ever did.
+Hi, I'm Sidhant Kumar, with a Bachelor of Information Technology, specializing in Network Technology, from Carleton University, along with an Advanced Diploma in Computer Engineering Technology – Networking from Algonquin College.
+
+My interests are primarily focused on **networking, infrastructure, systems administration, virtualization, cloud technologies, and cybersecurity**. I enjoy learning how different technologies work together and, more importantly, getting hands-on experience building and troubleshooting them.
+
+This website is a documentation of that journey.
+
+I use it to share the projects I work on, the technologies I experiment with, the problems I encounter, and the solutions I develop along the way. Rather than simply documenting the final result, I want to capture the process — **what I was trying to accomplish, how I approached it, what went wrong, how I fixed it, and what I learned from the experience.**
+
+Many of these projects are part of my personal homelab, where I continue to build practical experience with networking equipment, servers, Raspberry Pis, Kubernetes, virtualization, and other infrastructure technologies.
+
+My goal is to continuously learn, build, troubleshoot, and improve — while creating a record of that progress that I can look back on and share with others.
 
 ## Education
 
 - **Carleton University** — Bachelor of Information Technology, Network Technology (June 2026)
 - **Algonquin College** — Advanced Diploma, Computer Engineering Technology – Networking (bridging program)
-
-## Skills
-
-- **Networking:** CCNA, VLANs, advanced switching, Nokia Data Center Fabric, FortiManager/FortiAnalyzer, BlueCat, Wireshark
-- **Virtualization & Cloud:** VMware vSphere, Proxmox, Docker, KVM, Microsoft Azure
-- **Monitoring & Automation:** Prometheus, Grafana, Alertmanager, Kubernetes (K3s), Python
-- **Systems:** Windows, Linux (Ubuntu, Debian, RHEL)
-- **Languages:** Python, C/C++, HTML/CSS
-- **Clearance:** Secret Level, Government of Canada
