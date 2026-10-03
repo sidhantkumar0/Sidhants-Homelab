@@ -11,3 +11,14 @@
   aspect-ratio: 1.3333;
   object-fit: cover;
 }
+
+// Tighter portfolio grid: small gutters instead of space-around,
+// rows centered.
+.portfolio-grid {
+  justify-content: center;
+}
+
+.portfolio-cell {
+  flex: 0 0 32%;
+  margin: 0 0.66% 12px;
+}
