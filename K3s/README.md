@@ -9,6 +9,7 @@ What runs on the 4-node K3s cluster (pi-server3 = server, pi-server1/2/4 = agent
 | kube-prometheus-stack (Prometheus + Grafana) | `monitoring` | Grafana on NodePort `32000` |
 | arduino-exporter | `monitoring` | Prometheus ServiceMonitor (15s scrape) |
 | Headlamp | `headlamp` | NodePort `30937` — token login |
+| TriliumNext (notes, links, IP ranges) | `trilium` | NodePort `31081` |
 
 ## Headlamp
 
@@ -53,3 +54,4 @@ The `AlertmanagerConfig` (`homelab-email`) is picked up automatically by the Pro
 - The operator merges `AlertmanagerConfig` resources into a **gzipped** generated secret (`alertmanager.yaml.gz`, not `alertmanager.yaml`) — decode with `base64 -d | gunzip` when inspecting it.
 - The operator injects a `namespace="monitoring"` matcher into AlertmanagerConfig routes, so every alert needs that label to reach the email receiver — API test alerts need it set manually, and `PrometheusRule` alerts need `namespace: monitoring` in their rule labels too (Prometheus doesn't attach it on its own). Without it, alerts fall through to the null receiver silently: no error, no email. This one cost a full debugging session on 2026-10-01.
 - Gmail app passwords must be used with **no spaces**; revoke and rotate if one ever lands in chat or logs.
+- TriliumNext crashes on startup because Kubernetes injects a `TRILIUM_PORT` env var from the Service, which Trilium mistakes for its own port setting. Fix it with `sudo kubectl set env -n trilium deployment/trilium TRILIUM_PORT=8080`.
