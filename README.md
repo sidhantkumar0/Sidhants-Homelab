@@ -5,9 +5,9 @@ Welcome to my homelab project.
 
 This repository documents my journey building and expanding a personal homelab — a real, hands-on environment for learning networking, Linux, infrastructure, monitoring, containerization, and Kubernetes.
 
-Coming from a background in Nokia networking, I wanted a place to apply what I already know and push into areas I haven't worked with before. This is a living project: the hardware, network design, and services here will keep changing as I learn.
+I wanted a place to apply what I already know and push into areas I haven't worked with before. This is a living project: the hardware, network design, and services here will keep changing as I learn.
 
-Each major area of the lab (Cisco, Omada, Raspberry Pi, monitoring, troubleshooting, projects) has its own directory with detailed documentation. This README is the map — it tells you what's here and points you to where the details live.
+Each major area of the lab (Cisco, Network, Omada, Raspberry Pi, K3s, Troubleshooting, Docs) has its own directory with detailed documentation. This README is the map — it tells you what's here and points you to where the details live.
 
 ---
 
@@ -39,7 +39,7 @@ Goals for this project:
 | SDN Controller | TP-Link OC200 (Homelab-Controller, 192.168.10.101) |
 | Core Switch | Cisco Catalyst WS-C3850-24T-E (data-only, no PoE), 192.168.10.30 |
 | Compute | 4x Raspberry Pi 4 (K3s cluster) |
-| Virtualization | Proxmox Server — repurposed PC (32GB RAM, 500GB SSD), 192.168.20.100 |
+| Virtualization | Proxmox Server — repurposed PC (32GB RAM, 500GB SSD), 192.168.20.105 |
 | Microcontroller | Arduino (connected to PI-Server1 via USB for sensor data collection) |
 
 ---
@@ -51,7 +51,7 @@ Goals for this project:
 The lab is segmented into two active VLANs. The Homelab-Router (TP-Link, 192.168.0.1) feeds the core switch (192.168.10.30) over a trunk on port 1:
 
 - **VLAN 10 – Management** (192.168.10.0/24): Homelab-Controller (.101), Admin Laptop
-- **VLAN 20 – Servers** (192.168.20.0/24): 4x Raspberry Pi K3s cluster (.101–.104), Proxmox Server (.100)
+- **VLAN 20 – Servers** (192.168.20.0/24): 4x Raspberry Pi K3s cluster (.101–.104), Proxmox Server (.105)
 
 Full topology history and diagrams live in [`./Network/`](./Network/).
 
@@ -139,6 +139,9 @@ A core part of this project is documenting problems, not just working configs �
 - [x] Prometheus + Grafana deployed in-cluster via kube-prometheus-stack
 - [x] Arduino sensor exporter containerized and running in K3s
 - [x] Proxmox virtualization host added on VLAN 20
+- [x] NetBox installed then removed after a day, replaced by TriliumNext notes in K3s
+- [x] 2TB NAS drive installed in the Proxmox host and passed its health check
+- [x] Local AI test VM running on Proxmox (Ollama and Open WebUI)
 
 ---
 
@@ -178,6 +181,9 @@ Sidhants-Homelab/
 │   └── Homelab-Omada-Setup Guide.pdf
 ├── Raspberry-Pi/
 │   └── README.md              # Pi hardware + K3s cluster notes
+├── K3s/
+│   ├── README.md              # Cluster services (monitoring, Headlamp, Trilium)
+│   └── manifests              # Prometheus rules and Alertmanager config
 └── Troubleshooting/
     └── README.md              # Problem writeups (VLAN migration, adoption issues, …)
 ```
